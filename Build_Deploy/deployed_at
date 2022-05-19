@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+BASEDIR=$(dirname "$0")
+source ${BASEDIR}/time.sh
+image=${1:? "Image is required ex: "}
+values_file=$(mktemp)
+chart="./chart/test-app"
+cat << EOF > ${values_file}
+image:
+  repository: $(echo ${image} | awk -F ":" '{print $1}')
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: $(echo ${image} | awk -F ":" '{print $2}')
+EOF
+
+helm upgrade  simple-app --atomic -i ${chart} -f ${values_file}
+
+echo "///////////////////////////////"
+echo ""
+echo "Service Deploy At:$(epoch)"
+echo ""
+echo "///////////////////////////////"
